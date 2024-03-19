@@ -1,4 +1,5 @@
 import LEDconsts
+import Gateconsts
 
 def segment_to_led(name, dir, segmentnum):
     ''' Converts a given segment to specific LED pixels
@@ -18,6 +19,19 @@ def segment_to_led(name, dir, segmentnum):
         leds += [ledstart, ledstart+1, ledstart+2, ledstart+3]
     return leds
 
-print(segment_to_led(1, "row", 1))
+# print(segment_to_led(1, "row", 1))
 
-print(segment_to_led(5, "col", 20))
+# print(segment_to_led(5, "col", 20))
+
+def gate_to_led(gate):
+    """ Converts a given gate to specific LED pixels
+        gate: an int representing a specific gate
+        gates are numbered left to right, bottom to top
+    """
+    leds = [] # Array to store the leds representing a gate
+    segs = Gateconsts.gateSegs[gate] # The segments that represent a gate (hardcoded)
+    for seg in segs: 
+        leds+= segment_to_led(seg[0], seg[1], seg[2]) # Segments are arrays with name, dir, segmentnum
+    return leds
+
+print(gate_to_led(1))
