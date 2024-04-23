@@ -1,40 +1,52 @@
 import gate_conversions
 import json
 import board
-import neopixel
 import board
 import adafruit_dotstar as dotstar
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 import time
 
 
 # Define the number of pixels in your DotStar LED strip
-NUM_PIXELS = 30
+NUM_PIXELS = 300
 
 # Initialize the DotStar LED strip
-dots = dotstar.DotStar(board.SCK, board.MOSI, NUM_PIXELS, brightness=0.5)
+dots = gate_conversions.dots
 
 # Set up GPIO mode
-GPIO.setmode(GPIO.BCM)
+# GPIO.setmode(GPIO.BCM)
 
 # Define GPIO pins
-D_PINS = [17, 18, 22, 23]  # Example GPIO pins for D1, D2, D3, D4
+# D_PINS = [17, 18, 22, 23]  # Example GPIO pins for D1, D2, D3, D4
 
 # Set up GPIO pins as inputs
-for pin in D_PINS:
-    GPIO.setup(pin, GPIO.IN)
+# for pin in D_PINS:
+    # GPIO.setup(pin, GPIO.IN)
 
-f = open('example_puzzle.json') # Imports the puzzle as a json
+f = open('sample_board.json') # Imports the puzzle as a json
 data = json.load(f)
 
 def setup():
     gateLEDs = [] # Array to hold the LEDs representing a logic gate
-
+    inputLEDs = []
+    
     for gate_number in data['gates'].items(): # Convert all the gates in the puzzle to LEDs
-        gateLEDs += gate_conversions.gate_to_led(int(gate_number))
+        gateLEDs += gate_conversions.gate_to_led(int(gate_number[0]))
 
     for LED in gateLEDs:
         dots[LED] = (255, 0, 0) # Light up the perimeters of the gates
+        
+    for gate_num in range(0, 1):
+        for json_gate in data['gates'].items():
+            input_segs = json_gate[1]['input']
+            for input_seg in input_segs:
+                print(input_seg)
+                inputLEDs += gate_conversions.segment_to_led(input_seg[0], input_seg[1], input_seg[2])
+            print(inputLEDs)
+            
+    for LED in inputLEDs:
+        dots[LED] = (255, 0, 0)
+    dots.show()
 
 # Function to check if a pixel is lit up
 def is_pixel_lit(pixel_index):
@@ -97,6 +109,6 @@ def compute(gate):
 
 
 setup()
-while True:
-    for gate in data: # somehow loop through all the sensor boards?
-        compute(gate)
+# while True:
+    # for gate in data: # somehow loop through all the sensor boards?
+        # compute(gate)
