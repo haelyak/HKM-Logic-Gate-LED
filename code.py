@@ -34,7 +34,8 @@ def setup():
         gateLEDs += gate_conversions.gate_to_led(int(gate_number[0]))
 
     for LED in gateLEDs:
-        dots[LED] = (255, 0, 0) # Light up the perimeters of the gates
+        dots[LED] = (255, 255, 255) # Light up the perimeters of the gates
+    dots.show()
 
     for gate_num in range(0, 1):
         for json_gate in data['gates'].items():
@@ -42,15 +43,15 @@ def setup():
             for input_seg in input_segs:
                 print(input_seg)
                 inputLEDs += gate_conversions.segment_to_led(input_seg[0], input_seg[1], input_seg[2])
+                for LED in inputLEDs:
+
+                    dots[LED] = (255, 255, 255)
+                    dots.show()
+                    time.sleep(0.05)
                 print(inputLEDs)
 
-dots[127] = (255, 255, 255)
-dots.show()
 
-    #for LED in inputLEDs:
-        #dots[LED] = (255, 0, 0)
-        #dots.show()
-        #time.sleep(1)
+
 
 # Function to check if a pixel is lit up
 def is_pixel_lit(pixel_index):
@@ -83,32 +84,58 @@ def compute(gate):
     if type in data[gate]["accepts"]:
         if type == "NAND":
             if all(is_pixel_lit(p) for p in inputs):
+                gateLEDs += gate_conversions.gate_to_led(gate)
+                for LED in gateLEDs:
+                    dots[LED] = (0, 0, 0) # Turn off perimeters of gates
                 return False
             else:
+                gateLEDs += gate_conversions.gate_to_led(gate)
+                for LED in gateLEDs:
+                    dots[LED] = (255, 0, 0) # Light up the perimeters of the gates in red
                 for LED in outputs:
-                    dots[LED] = (255, 0, 0) # Light up the output segments
+                    dots[LED] = (255, 0, 0) # Light up the output segments in red
                 return True
         elif type == "AND":
             if all(is_pixel_lit(p) for p in inputs):
+                gateLEDs += gate_conversions.gate_to_led(gate)
+                for LED in gateLEDs:
+                    dots[LED] = (255, 0, 0) # Light up the perimeters of the gates in red
                 for LED in outputs:
                     dots[LED] = (255, 0, 0) # Light up the output segments
                 return True
             else:
+                gateLEDs += gate_conversions.gate_to_led(gate)
+                for LED in gateLEDs:
+                    dots[LED] = (0, 0, 0) # Turn off perimeters of gates
                 return False
         elif type == "OR":
             if any(is_pixel_lit(p) for p in inputs):
+                gateLEDs += gate_conversions.gate_to_led(gate)
+                for LED in gateLEDs:
+                    dots[LED] = (255, 0, 0) # Light up the perimeters of the gates in red
                 for LED in outputs:
                     dots[LED] = (255, 0, 0) # Light up the output segments
                 return True
             else:
+                gateLEDs += gate_conversions.gate_to_led(gate)
+                for LED in gateLEDs:
+                    dots[LED] = (0, 0, 0) # Turn off perimeters of gates
                 return False
         elif type == "XOR":
             if sum(is_pixel_lit(p) for p in inputs) % 2 != 0:
+                gateLEDs += gate_conversions.gate_to_led(gate)
+                for LED in gateLEDs:
+                    dots[LED] = (255, 0, 0) # Light up the perimeters of the gates in red
                 for LED in outputs:
                     dots[LED] = (255, 0, 0) # Light up the output segments
                 return True
             else:
+                gateLEDs += gate_conversions.gate_to_led(gate)
+                for LED in gateLEDs:
+                    dots[LED] = (0, 0, 0) # Turn off perimeters of gates
                 return False
+
+
 
 
 
