@@ -10,7 +10,6 @@ import digitalio
 num_pixels = 300
 dots = adafruit_dotstar.DotStar(board.A4, board.A5, num_pixels, brightness=0.1, auto_write=False)
 
-dots[0] = (255, 0, 0)
 
 def is_hardware_spi(clock_pin, data_pin):
     try:
@@ -27,8 +26,6 @@ def is_hardware_spi(clock_pin, data_pin):
 # else:
     # print("This pin combination isn't hardware SPI.")
 
-frame_count = 0
-
 
 def segment_to_led(name, dir, segmentnum):
     ''' Converts a given segment to specific LED dots
@@ -40,11 +37,8 @@ def segment_to_led(name, dir, segmentnum):
 
     if "col" == dir: # cols have 3 LEDs per segment
         previous = sum(LEDconsts.rowlengths) + sum(LEDconsts.collengths[:name]) # add up the previous cols to figure out starting LED
-        if segmentnum == (LEDconsts.segpercol[name] - 1):
-            leds = [previous + 1]
-        else:
-            ledstart = previous + segmentnum*2 # each segment has 3LEDs but overlaps with 1 LED from previous segment
-            leds += [ledstart, ledstart+1, ledstart+2]
+        ledstart = previous + segmentnum*2 # each segment has 3LEDs but overlaps with 1 LED from previous segment
+        leds += [ledstart, ledstart+1, ledstart+2]
     if "row" == dir: # rows have 4 LEDs per segment
         previous =  sum(LEDconsts.rowlengths[:name])
         ledstart = previous + segmentnum*3
@@ -52,22 +46,22 @@ def segment_to_led(name, dir, segmentnum):
     return leds
 
 
-for i in range(0,len(LEDconsts.collengths)):
-    for j in range(0, LEDconsts.segpercol[i]):
-        print("(", i, "col", j, ")", segment_to_led(i,"col", j))
-        for leds in segment_to_led(i,"col", j):
-            dots[leds] = (255, 0, 0)
-            dots.show()
-        time.sleep(1)
+# for i in range(0,len(LEDconsts.collengths)):
+    #for j in range(0, LEDconsts.segpercol[i]):
+        #print("(", i, "col", j, ")", segment_to_led(i,"col", j))
+        #for led in segment_to_led(i,"col", j):
+            #dots[led] = (255, 0, 0)
+            #dots.show()
+        #time.sleep(1)
 
 
-# for i in range(0,len(LEDconsts.rowlengths)):
-    # for j in range(0, LEDconsts.segperrow[i]):
-        # print("(", i, "row", j, ")", segment_to_led(i,"row", j))
-        # for leds in segment_to_led(i,"col", j):
-            # dots[leds] = (255, 0, 0)
-        # dots.show()
-        # time.sleep(1)
+#for i in range(0,len(LEDconsts.rowlengths)):
+    #for j in range(0, LEDconsts.segperrow[i]):
+        #print("(", i, "row", j, ")", segment_to_led(i,"row", j))
+        #for leds in segment_to_led(i,"row", j):
+            #dots[leds] = (255, 0, 0)
+            #dots.show()
+        #time.sleep(1)
 
 
 def gate_to_led(gate):

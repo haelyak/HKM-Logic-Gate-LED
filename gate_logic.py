@@ -29,30 +29,34 @@ data = json.load(f)
 def setup():
     gateLEDs = [] # Array to hold the LEDs representing a logic gate
     inputLEDs = []
-    
+
     for gate_number in data['gates'].items(): # Convert all the gates in the puzzle to LEDs
         gateLEDs += gate_conversions.gate_to_led(int(gate_number[0]))
 
     for LED in gateLEDs:
         dots[LED] = (255, 0, 0) # Light up the perimeters of the gates
-        
+
     for gate_num in range(0, 1):
         for json_gate in data['gates'].items():
             input_segs = json_gate[1]['input']
             for input_seg in input_segs:
                 print(input_seg)
                 inputLEDs += gate_conversions.segment_to_led(input_seg[0], input_seg[1], input_seg[2])
-            print(inputLEDs)
-            
-    for LED in inputLEDs:
-        dots[LED] = (255, 0, 0)
-    dots.show()
+                print(inputLEDs)
+
+dots[127] = (255, 255, 255)
+dots.show()
+
+    #for LED in inputLEDs:
+        #dots[LED] = (255, 0, 0)
+        #dots.show()
+        #time.sleep(1)
 
 # Function to check if a pixel is lit up
 def is_pixel_lit(pixel_index):
     if pixel_index < 0 or pixel_index >= NUM_PIXELS:
         return False  # Pixel index out of range
-    
+
     # Check if the color of the specified pixel is not black (lit up)
     return dots[pixel_index] != (0, 0, 0)
 
@@ -61,16 +65,16 @@ def compute(gate):
     inputs = [] # Convert input segments from json to led pixels
     for input in data[gate]["input"]:
         inputs += gate_conversions.segment_to_led(input[0], input[1], input[2])
-    
+
     outputs = [] # Convert output segments from json to led pixels
     for output in data[gate]["output"]:
         outputs += gate_conversions.segment_to_led(output[0], output[1], output[2])
 
     gateType = ["NAND", "AND", "OR", "XOR" ]
-    
+
     # Read in the signal from each sensor pin
     D_states = [GPIO.input(pin) for pin in D_PINS]
-    
+
 
     id = D_states[1] << 1 | D_states[2] # These two pins represent the type of board
                                         # Convert to a 2-digit binary number
