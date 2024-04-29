@@ -8,7 +8,7 @@ import digitalio
 
 
 num_pixels = 300
-dots = adafruit_dotstar.DotStar(board.A4, board.A5, num_pixels, brightness=0.1, auto_write=False)
+dots = adafruit_dotstar.DotStar(board.A4, board.A5, num_pixels, brightness=0.05, auto_write=False)
 
 
 def is_hardware_spi(clock_pin, data_pin):
