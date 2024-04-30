@@ -8,7 +8,7 @@ import digitalio
 
 
 num_pixels = 300
-dots = adafruit_dotstar.DotStar(board.A4, board.A5, num_pixels, brightness=0.05, auto_write=False)
+dots = adafruit_dotstar.DotStar(board.A4, board.A5, num_pixels, brightness=1, auto_write=False)
 
 
 def is_hardware_spi(clock_pin, data_pin):
@@ -19,12 +19,6 @@ def is_hardware_spi(clock_pin, data_pin):
     except ValueError:
         return False
 
-
-# Provide the two pins you intend to use.
-# if is_hardware_spi(board.A4, board.A5):
-    # print("This pin combination is hardware SPI!")
-# else:
-    # print("This pin combination isn't hardware SPI.")
 
 
 def segment_to_led(name, dir, segmentnum):

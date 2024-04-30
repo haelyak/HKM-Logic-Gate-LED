@@ -73,4 +73,12 @@ GATES = {
 def parse_gates(data, gate_index, mux_index, is_four_pin):
     inc = 4 if is_four_pin else 2
 
+    # print(gate_index)
+    # print(mux_index)
+    # print(inc)
+    # print(mux_index*16+gate_index*inc)
+    # print(mux_index*16+gate_index*inc+inc)
+      
+    # print(tuple(data[mux_index*16+gate_index*inc:mux_index*16+gate_index*inc+inc] ))
+
     return GATES[tuple(data[mux_index*16+gate_index*inc:mux_index*16+gate_index*inc+inc] )]
