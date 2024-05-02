@@ -5,11 +5,30 @@ import gate_conversions
 import data_reader
 
 
+def reduce(f, arr):
+    if len(arr) == 0: 
+        return None 
+    if len(arr) == 1: 
+        return arr[0]
+
+    if len(arr) == 2:
+        return f(arr[0], arr[1])
+    return reduce(f, f(arr[0], arr[1]))
+
+logic_funcs = {
+    "NAND": lambda x, y: not (x and y) ,
+    "AND": lambda x, y: x and y,
+    "OR": lambda x, y: x or y ,
+    "XOR": lambda x,y: x ^ y 
+}
+
+
 # Define the number of pixels in your DotStar LED strip
 NUM_PIXELS = 300
 
 # Define the colors of the LEDs
-LED_COLOR = (77, 14, 0)
+LED_TRUE = (77, 14, 0)
+LED_FALSE = (0, 0, 0)
 LED_WHITE = (50, 50, 50)
 LED_OFF = (0, 0, 0)
 
@@ -24,7 +43,6 @@ data = json.load(f)
 def light_up(leds, color):
     for led in leds:
         dots[led] = color
-    dots.show()
 
 def setup():
     gateLEDs = []  # Array to hold the LEDs representing a logic gate
@@ -37,7 +55,6 @@ def setup():
 
     for LED in gateLEDs:
         dots[LED] = LED_WHITE  # Light up the perimeters of the gates in white
-    dots.show()
 
     for gate_num, gate_info in data[
         "gates"
@@ -52,15 +69,15 @@ def setup():
                     LED
                 ) in inputLEDs:  # Turn the inputLEDs white to indicate they are active
                     dots[LED] = LED_WHITE
-                    dots.show()
                     time.sleep(0.05)
 
 
 def compute_gate(gate, mux_index, is_four_pin):
 
     board_data = data_reader.read_data()  # Read in all the data from the sensor boards
+    print(board_data)
     gateType = data_reader.parse_gates(board_data, gate[1]["gate_index"], mux_index, is_four_pin)
-    # print(gateType)
+    print(gateType)
 
     gateLEDs = []  # Convert gates to led pixels
     gateLEDs += gate_conversions.gate_to_led(int(gate[0]))
@@ -76,75 +93,62 @@ def compute_gate(gate, mux_index, is_four_pin):
 
     if is_four_pin == 0:
         if gateType == "ON":
-            light_up(outputs[1:], LED_COLOR)
+            light_up(outputs[1:], LED_TRUE)
             return True
         elif gateType == "OFF":
-            light_up(outputs[1:], LED_OFF)
+            light_up(outputs[1:], LED_FALSE)
             return False
         elif gateType is None:
             light_up(outputs[1:], LED_WHITE)
             return None
     else: # Logic gate not a switch
-        if gateType is None:
-           light_up(outputs, LED_WHITE)
-           light_up(gateLEDs, LED_OFF)
-           return None
-        if gateType in gate[1]["accepts"]: # If the gate accepts the puzzle piece placed on it
-            
-            input_gates = gate[1]["input_gate"]
-            input_bools = []
+       
+        input_gates = gate[1]["input_gate"]
+        input_bools = []
 
-            for input_gate in input_gates:
-                input_bools += [bool_tree[input_gate]]
+        for input_gate in input_gates:
+            val = bool_tree[input_gate]
+            if val is None: 
+                light_up(gateLEDs, LED_WHITE)
+            else:
+                input_bools.append(val)
 
-            if gateType == "NAND":
-                if all(input_bools) : # all is true if every element is non-zero (ie 1)   
-                    light_up(gateLEDs, LED_OFF)
-                    return False
-                else:
-                    light_up(gateLEDs, LED_COLOR)
-                    light_up(outputs, LED_COLOR)
-                    return True
-            if gateType == "AND":
-                if all(input_bools): # All the inputs are non-zero
-                    light_up(gateLEDs, LED_COLOR)
-                    light_up(outputs, LED_COLOR)
-                    return True
-                else:
-                    light_up(gateLEDs, LED_OFF)
-                    return False
-            elif gateType == "OR":
-                if any(input_bools):
-                    light_up(gateLEDs, LED_COLOR)
-                    light_up(outputs, LED_COLOR)
-                    return True
-                else:
-                    light_up(gateLEDs, LED_OFF)
-                    return False
-            elif gateType == "XOR":
-                if input_bools[0] == None or input_bools[1] == None:
-                    return False
-                if input_bools[0] ^ input_bools[1]:
-                    light_up(gateLEDs, LED_COLOR)
-                    light_up(outputs, LED_COLOR)
-                    return True
-                else:
-                    light_up(gateLEDs, LED_OFF)
-                    return False    
+        if len(input_bools) == 0:
+            light_up(gateLEDs, LED_OFF)
+            light_up(outputs, LED_OFF)
+            return None
+
+        if gateType is None or gateType not in gate[1]["accepts"] or len(input_bools)< len(input_gates):
+            # no computation
+            light_up(outputs, LED_OFF)
+            light_up(gateLEDs, LED_WHITE)
+            return None
+
+
+        f = logic_funcs[gateType]
+
+        if reduce(f, input_bools):
+            light_up(gateLEDs, LED_TRUE)
+            light_up(outputs, LED_TRUE)
+            return True
         else:
+            light_up(gateLEDs, LED_FALSE)
             return False
-    dots.show()
+        
+
+
 
 
 setup()
+dots.show()
 print("Done setup")
 
 bool_tree = [None for i in data["gates"].items()]
 try:
     while True:
-        print("Computing gates")
         for gate in data["gates"].items():  # Loop through all the gates in the puzzle
             bool_tree[int(gate[0])] = compute_gate(gate, gate[1]["mux_index"], gate[1]["is_four_pin"])
+        dots.show()
 
 finally:
     dots.deinit()
